@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<utils:Bocadillo xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				 xmlns:s="library://ns.adobe.com/flex/spark" 
+				 xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:utils="org.vbvb.utils.*" 
+				 x="10" y="1" 
+				 helpWidth="161"
+				 helpHeight="53"
+				 helpX="32"
+				 helpY="30"
+				 buttonText="Cerrar"
+				 buttonWidth="64"
+				 fontHelpSize="10"
+				 helpText="Pulse sobre la imagen&#xd;para maximizar/minimizarla.&#xd;Observe que se actualiza la vista&#xd;en miniatura al cerrar el panel."
+				 clickHelp="clickH(event)">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import mx.core.FlexGlobals;
+			import mx.managers.PopUpManager;
+			
+			public static var visited:Boolean=false;
+			
+			protected function clickH(event:MouseEvent):void
+			{
+				visited=true;
+				
+			}
+			
+		]]>
+	</fx:Script>
+	
+	
+</utils:Bocadillo>

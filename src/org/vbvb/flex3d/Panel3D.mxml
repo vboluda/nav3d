@@ -1,0 +1,474 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 creationComplete="inicializar(event)" xmlns:flex3d="org.vbvb.flex3d.*"
+		 mouseDown="onMouseDown(event)"
+		 mouseMove="onMouseMove(event)"
+		 mouseUp="onMouseUp(event)" xmlns:thumbnail="org.vbvb.flex3d.thumbnail.*"
+		 >
+	<fx:Metadata>
+		[Event(name="endCreation", type="flash.events.Event")]
+	</fx:Metadata>
+	<s:layout>
+		<s:BasicLayout/>
+	</s:layout>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+		<flex3d:HDiscreteSlider id="s3d_slider" x="30" y="{this.height-30}" width="97%" height="25" minimum="{_initialAngle}" maximum="{_endAngle}"
+								value="{_initialAngle}" visible="{_showSlider}"/>
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.core.Container;
+			import mx.core.IVisualElement;
+			import mx.core.UIComponent;
+			import mx.events.CollectionEvent;
+			import mx.events.EffectEvent;
+			import mx.events.FlexEvent;
+			
+			import spark.collections.Sort;
+			import spark.collections.SortField;
+			import spark.components.BorderContainer;
+			import spark.effects.Animate;
+			import spark.effects.animation.MotionPath;
+			import spark.effects.animation.SimpleMotionPath;
+			import spark.effects.easing.Elastic;
+			import spark.effects.easing.Power;
+			import spark.layouts.supportClasses.LayoutBase;
+			
+			private var _elements:ArrayCollection=new ArrayCollection();
+
+			public function get elements():ArrayCollection
+			{
+				return _elements;
+			}
+
+			public function set elements(value:ArrayCollection):void
+			{
+				_elements = value;
+			}
+
+			
+			private var _radius:Number=1200;
+			private var _radiusx:Number=-1;
+			private var _position:Number=200;
+			private var _px:Number=-1;
+			private var _pz:Number=0;
+			private var _py:Number=100;
+			
+			[Bindable]
+			private var _showSlider:Boolean=true;
+			
+			
+			
+			[Bindable]
+			private var _initialAngle:Number=-1;
+			[Bindable]
+			private var _endAngle:Number=-1;
+			
+			private  var _selectedPanel:Container3d=null;
+			
+			
+
+			public function get selectedPanel():Container3d
+			{
+				return _selectedPanel;
+			}
+
+			public function set selectedPanel(value:Container3d):void
+			{
+				s3d_slider.enabled=(value==null);
+				_selectedPanel = value;
+				if(value==null){
+					activateAll();
+				}else{
+					deactivateAll();
+				}
+			}
+
+
+			public function get pz():Number
+			{
+				return _pz;
+			}
+
+			public function set pz(value:Number):void
+			{
+				_pz = value;
+			}
+
+
+			public function get px():Number
+			{
+				return _px;
+			}
+
+			public function set px(value:Number):void
+			{
+				_px = value;
+			}
+
+			
+
+			public function get position():Number
+			{
+				return _position;
+			}
+
+			public function set position(value:Number):void
+			{
+				_position = value;
+			}
+
+
+			public function get radius():Number
+			{
+				return _radius;
+			}
+
+			public function set radius(value:Number):void
+			{
+				_radius = value;
+			}
+
+			private var _initialPosition:Number=0;
+			private var _endPosition:Number=360;
+			
+
+			[Bindable]
+			public function get initialPosition():Number
+			{
+				return _initialPosition;
+			}
+
+			public function set initialPosition(value:Number):void
+			{
+				_initialPosition = value;
+			}
+
+			protected function r2g(r:Number):Number{
+				return r*180/Math.PI;
+			}
+			
+			protected function g2r(g:Number):Number{
+				return g*Math.PI/180;
+			}
+			
+			protected function fz(alfa:Number):Number{
+				var rad:Number=g2r(alfa);
+				trace("FZ{R: "+radius+" PZ: "+pz+" alfa: "+alfa+"}");
+				return (_pz+(radius)*Math.sin(rad))-position;
+			}
+			protected function fx(alfa:Number):Number{
+				var rad:Number=g2r(alfa);
+				trace("FX{R: "+radiusx+" PX: "+px+" alfa: "+alfa+"}");
+				return _px+(radiusx)*Math.cos(rad);
+			}
+			
+			protected function dfy(alfa:Number=0):Number{
+				var beta:Number=90-alfa;
+				return beta;
+			}
+			
+			protected function ifx(x:Number):Number{
+				var rad:Number=Math.acos((x-_px)/radiusx);
+				var alfa:Number=r2g(rad);
+				trace("INV FX{X: "+x+" R: "+radiusx+" PX: "+px+" alfa: "+alfa+"}");
+				return alfa;
+			}
+
+			protected function inicializar(event:FlexEvent):void
+			{
+				if(_px==-1) _px=this.width/2;
+				if(radiusx==-1) radiusx=radius;
+				if(_initialAngle==-1) _initialAngle=initialPosition;
+				if(_endAngle==-1) _endAngle=endPosition;
+				
+				addEventListener(Event.ADDED_TO_STAGE,collectionChange);
+//				addEventListener(MouseEvent.MOUSE_UP,onMouseUp,false);
+				for(var i=this.numElements-1;i>=0;i--){
+					var p:Object=getElementAt(i);
+					if(p.id!=null &&  p.id.search("s3d_")!=-1) continue;
+					if(!(p is UIComponent)) continue;
+					elements.addItem(p);
+				}
+				var alfa:Number=_initialPosition;
+				var step:Number=0;
+				if(elements.length>1){
+					step=(endPosition-_initialPosition)/(elements.length-1);
+				}
+				trace("Step: "+step);
+				for(var i:Number=0,sz:Number=elements.length;i<sz;i++){
+					var c:UIComponent=elements.getItemAt(i) as UIComponent;
+					this.removeElement(c);
+					var container:Container3d=new Container3d(c,this);
+					container.angle=alfa;
+					container.initialAngle=alfa;
+					elements.setItemAt(container,i);
+					trace("Alfa: "+alfa);
+					alfa=alfa+step;
+					//container.dispatchEvent(new FlexEvent(FlexEvent.CREATION_COMPLETE));
+				}
+				
+				s3d_slider.numElem=elements.length;
+				this.addElement(s3d_slider);
+				s3d_slider.addEventListener(Event.CHANGE,sliderChange);
+				s3d_slider.callback=function(o){
+					sliderChange();
+				}
+				collectionChange();
+				dispatchEvent(new Event("endCreation"));
+			}
+			
+			public function collectionChange(event=null):void{
+				var depth:ArrayCollection=calculateDepth();
+				var nextElement:Number=deleteStage();
+				for(var i:Number=depth.length-1;i>=0;i--){
+					var o:Object=depth.getItemAt(i);
+					var c:UIComponent=o.obj as UIComponent;
+					c.y=o.y;
+					c.z=o.z;
+					c.rotationY=o.ry;
+					c.x=o.x;
+					this.addElement(c);
+				}
+			}
+			
+			
+			private function calculateDepth():ArrayCollection{
+				var depth:ArrayCollection=new ArrayCollection();
+				var dataSortField:SortField=new SortField();
+				dataSortField.name="z";
+				dataSortField.numeric=true;
+				var numericSort:Sort=new Sort();
+				numericSort.fields=[dataSortField];
+				trace("------------------------------------------");
+				for(var i:Number=0,sz:Number=elements.length;i<sz;i++){
+					var p:Object=elements.getItemAt(i);
+					if(p is Container3d){
+						var c:Container3d=p as Container3d;
+						if(c.id!=null &&  c.id.search("s3d_")!=-1) continue;
+						var obj:Object=new Object();
+						trace("Slider: "+s3d_slider.value);
+						var alfa2: Number=c.angle+s3d_slider.value
+						trace("Alfa2: "+alfa2);
+						obj.x=fx(alfa2);
+						trace("X: "+obj.x);
+						obj.y=_py;
+						obj.z=fz(alfa2);
+						trace("Z: "+obj.z);
+						obj.ry=dfy(alfa2);
+						obj.obj=c;
+						obj.prx=obj.x+c.width/2;
+						depth.addItem(obj);
+					}
+				}
+				depth.sort=numericSort;
+				depth.refresh();
+				return depth;
+			}
+			
+			private function deleteStage():Number{
+				this.removeAllElements();
+				this.addElement(s3d_slider);
+				return this.numElements;
+			}
+			
+			
+			protected function sliderChange(event:Event=null):void
+			{
+				//_initialPosition=s3d_slider.value;
+				collectionChange();
+			}
+			
+			protected function clickBack(event:MouseEvent):void
+			{
+				selectedPanel.bringToBack();
+				
+			}
+			
+			public function deactivateAll(){
+				for(var e:Object in elements){
+					if(!(e is UIComponent)) continue;
+					var ui:UIComponent=e as UIComponent;
+					if(ui==selectedPanel) continue;
+					ui.enabled=false;
+					ui.alpha=0.3;
+				}
+			}
+			
+			public function activateAll(){
+				for(var e:Object in elements){
+					if(!(e is UIComponent)) continue;
+					var ui:UIComponent=e as UIComponent;
+					ui.enabled=true;
+					ui.alpha=1;
+				}
+			}
+
+			public function get radiusx():Number
+			{
+				return _radiusx;
+			}
+
+			public function set radiusx(value:Number):void
+			{
+				_radiusx = value;
+			}
+
+			[Bindable]
+			public function get endPosition():Number
+			{
+				return _endPosition;
+			}
+
+			public function set endPosition(value:Number):void
+			{
+				_endPosition = value;
+			}
+
+			public function get py():Number
+			{
+				return _py;
+			}
+
+			public function set py(value:Number):void
+			{
+				_py = value;
+			}
+
+			public function get initialAngle():Number
+			{
+				return _initialAngle;
+			}
+
+			public function set initialAngle(value:Number):void
+			{
+				_initialAngle = value;
+			}
+
+			public function get endAngle():Number
+			{
+				return _endAngle;
+			}
+
+			public function set endAngle(value:Number):void
+			{
+				_endAngle = value;
+			}
+
+			public var dragIniX:Number=-1;
+			private var dragEndX:Number=-1;
+			public var dragFlag:Boolean=false;
+			protected function onMouseDown(event:MouseEvent):void
+			{
+				trace("Mouse out");
+				if(this.selectedPanel!=null){
+					if(event.localX<selectedPanel.x || event.localX>selectedPanel.x+selectedPanel.width
+						|| event.localY<selectedPanel.y || event.localY>selectedPanel.y+selectedPanel.height){
+						//ie: press outside selected pannel must be ignored
+						event.stopImmediatePropagation();
+						trace("Fuera del panel: ignorar");
+						return;
+					}
+					trace("Dento del panel: no ignorar");
+					return;
+				}
+				trace("no hay panel - drag");
+				dragIniX=event.stageX;
+				dragEndX=-1;
+				dragFlag=false;
+			}
+			
+			protected function onMouseUp(event:MouseEvent):void
+			{
+				if(this.selectedPanel!=null) return;
+				if(dragFlag){ //ie: is a drag event
+					event.stopImmediatePropagation();
+					return;
+				}
+				dragIniX=-1;
+				dragFlag=false;
+			}
+			
+			protected function onMouseMove(event:MouseEvent):void
+			{
+				if(event.eventPhase!=EventPhase.BUBBLING_PHASE) return;
+				if(event.target==s3d_slider) return;
+				if(dragIniX==-1) return;
+				if(this.selectedPanel!=null) return;
+				if(!event.buttonDown){
+					dragIniX=-1
+					dragFlag=false;
+					return;
+				}
+				dragEndX=event.stageX;
+				var alfaIni:Number=ifx(dragIniX);
+				var alfaEnd:Number=ifx(dragEndX);
+				var alfaRes:Number=s3d_slider.value-(alfaIni-alfaEnd)*2;
+				if(alfaRes>s3d_slider.maximum) alfaRes=s3d_slider.maximum;
+				if(alfaRes<s3d_slider.minimum) alfaRes=s3d_slider.minimum;
+				s3d_slider.value=alfaRes;
+				collectionChange();
+				dragIniX=dragEndX;
+				dragFlag=true;
+			}
+			
+			
+			public function selectContainer(c:Container3d){
+				var angle:Number=c.initialAngle;
+				trace("Change Angle: "+angle+" min: "+s3d_slider.minimum+" max: "+s3d_slider.maximum);
+				var oldAngle:Number=s3d_slider.value;
+				angle=90-angle;
+				if(angle>s3d_slider.maximum) angle=s3d_slider.maximum;
+				if(angle<s3d_slider.minimum) angle=s3d_slider.minimum;
+				var seconds=90*1000/Math.abs(oldAngle-angle);
+				//s3d_slider.value=angle,
+				var toFrontSMP:SimpleMotionPath=new SimpleMotionPath("variable");
+				var toFront:Animate=new Animate();
+				toFrontSMP.valueFrom=variable;
+				toFrontSMP.valueTo=angle;
+				toFront.duration=500;
+				var moveType:Elastic=new Elastic();
+				moveType.ease(1.0);
+				toFront.easer=moveType;
+				toFront.motionPaths=new Vector.<MotionPath>();
+				toFront.motionPaths.push(toFrontSMP);
+				toFront.addEventListener(EffectEvent.EFFECT_END,function(e){
+					c.bringToFront(px,py,0);
+				});
+				toFront.play([this]);
+			}
+			
+			public function get variable(){
+				return s3d_slider.value;
+			}
+			
+			public function set variable(n:Number){
+				s3d_slider.value=n;
+				collectionChange();
+			}
+
+
+			[Bindable]
+			public function get showSlider():Boolean
+			{
+				return _showSlider;
+			}
+			
+		
+
+			public function set showSlider(value:Boolean):void
+			{
+				_showSlider = value;
+			}
+			
+			
+		]]>
+	</fx:Script>
+	
+	
+</s:Group>

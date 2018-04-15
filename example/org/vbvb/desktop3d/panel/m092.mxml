@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Panel xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:flex3d="org.vbvb.flex3d.*"
+		 xmlns:help="org.vbvb.desktop3d.help.*"
+		 width="300" height="300" borderVisible="false" dropShadowVisible="true"
+		 title="M92 - Cúmulo globular"
+		 creationComplete="init(event)">
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			
+			import org.vbvb.desktop3d.help.HelpImage;
+			import org.vbvb.flex3d.Container3d;
+			import org.vbvb.flex3d.thumbnail.D3dEvent;
+			protected function changeState(event:MouseEvent):void
+			{
+				if(currentState=="imagen") currentState="default";
+				else currentState="imagen";
+				
+			}
+			
+			var help:HelpImage=null;
+			protected function init(event:FlexEvent):void
+			{
+				addEventListener(D3dEvent.BRING_FRONT,front);
+			}
+			
+			private function front(event:D3dEvent){
+				if(HelpImage.visited) return;
+				help=PopUpManager.createPopUp(this,HelpImage,true) as HelpImage;
+				help.x=event.xPosition;
+				help.y=event.yPosition;
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:states>
+		<s:State name="default"/>
+		<s:State name="imagen"/>
+	</s:states>
+	<s:transitions>
+		<s:Transition id="transitionImage" fromState="*" toState="*">
+			<s:Parallel id="t1" target="{imagenMessier}">
+				<s:Resize duration="400"/>
+				<s:Move duration="400"/>
+				<s:Fade duration="400"/>
+			</s:Parallel>
+		</s:Transition>
+	</s:transitions>
+	<s:Label x="136" y="10" fontSize="20" text="Messier 92" includeIn="default"/>
+	<s:Label x="136" y="43" width="152" height="51" fontSize="16" text="Cúmulo globular"
+			 textAlign="left" verticalAlign="middle" includeIn="default"/>
+	<s:TextArea x="12" y="126" width="278" height="140" borderVisible="false" editable="false"  enabled="false"
+				text="El número 92 del catálog de Messier, hace referencia a un cúmulo globular localizado en la constelación de Hércules.&#xd;&#xd;Es uno de los cúmulos globulares más brillantes del cielo del hemisferio norte y se cree que es uno de los más antiguos."
+				verticalAlign="justify" includeIn="default"/>		
+	<s:Image id="imagenMessier" x="10" y="10" x.imagen="30" y.imagen="30" width="118" height="113" 
+			 width.imagen="240" height.imagen="210"  source="@Embed('assets/m092.jpg')" 
+			 toolTip="Pulse para maximizar" toolTip.imagen="Pulse para  minimizar" click="changeState(event)"/>
+	
+</s:Panel>

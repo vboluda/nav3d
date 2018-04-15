@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:List xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 skinClass="org.vbvb.flex3d.thumbnail.ThumbnailListSkin"
+		 dataProvider="{componentList}"
+		 creationComplete="init(event)">
+	<fx:Declarations>
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			
+			import org.vbvb.flex3d.Container3d;
+			import org.vbvb.flex3d.Panel3D;
+			
+			import spark.components.Panel;
+			
+			[Bindable]			
+			private var componentList:ArrayCollection=new ArrayCollection();
+			private var _parentPanel:Panel3D=null;
+			
+			public function get parentPanel():Panel3D
+			{
+				return _parentPanel;
+			}
+
+			public function set parentPanel(value:Panel3D):void
+			{
+				_parentPanel = value;
+				_parentPanel.addEventListener("endCreation",parentChange);
+			}
+			
+			private function parentChange(event){
+				//trace("******* HA TERMINADO LA CREACIÓLN DE LA LISTA");
+				componentList.removeAll();
+				var  elements:ArrayCollection=_parentPanel.elements;
+				for(var i:Number=elements.length-1;i>=0;i--){
+					var obj:Object=elements.getItemAt(i);
+					if(!(obj is Container3d)) continue;
+					var c:Container3d=obj as Container3d;
+					componentList.addItem(obj);
+				}
+				trace("***** Elements included in list: "+componentList.length +" of "+_parentPanel.numElements);
+			}
+			
+			protected function init(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+				addEventListener(D3dEvent.THUMBNAIL_CLICK_EVENT,selectThumbnail);
+				
+			}
+			
+			var selectedPanel:Container3d=null;
+			protected function selectThumbnail(event:D3dEvent):void
+			{
+				if(selectedPanel!=null) return;
+				selectedPanel=event.thumbnailContainer;
+				if(selectedPanel==_parentPanel.selectedPanel) {
+					selectedPanel=null;
+					return;
+				}
+				selectedPanel.addEventListener(D3dEvent.BRING_FRONT,function(e:D3dEvent){
+					selectedPanel=null;
+				});
+				if(_parentPanel.selectedPanel!=null){
+					_parentPanel.addEventListener(D3dEvent.BRING_BACK,onBackEvent);
+					_parentPanel.selectedPanel.bringToBack();
+				}else{
+					_parentPanel.selectContainer(event.thumbnailContainer);
+				}
+			}
+			
+			private function onBackEvent(e:D3dEvent):void{
+				_parentPanel.selectContainer(selectedPanel);
+				_parentPanel.removeEventListener(D3dEvent.BRING_BACK,onBackEvent);
+			}
+		]]>
+	</fx:Script>
+</s:List>

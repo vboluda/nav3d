@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Panel xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" width="300" height="300">
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import mx.controls.Image;
+			
+			var image:Image=new Image();
+			
+			protected function click(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				Alert.show("Hola");
+			}
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:Label x="25" y="22" text="X: {this.parent.x}"/>
+	<s:Label x="25" y="32" text="Z: {this.parent.z}"/>
+	<s:Label id="ry" x="25" y="42" text="RY: {this.parent.rotationY}"/>
+	<s:Button x="218" y="236" label="hola" click="click(event)"/>
+	<!--<s:Image x="264" y="-30" source="close.png"/>-->
+	
+</s:Panel>

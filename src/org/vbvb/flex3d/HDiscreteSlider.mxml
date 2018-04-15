@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:HSlider xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		   xmlns:s="library://ns.adobe.com/flex/spark" 
+		   xmlns:mx="library://ns.adobe.com/flex/mx"
+		   creationComplete="inicializar(event)"
+		   mouseUp="onChange(event)"
+		   mouseMove="onMouseMove(event)"
+		  >
+	<fx:Script>
+		<![CDATA[
+			import mx.events.EffectEvent;
+			import mx.events.FlexEvent;
+			
+			protected function inicializar(event:FlexEvent):void
+			{
+					
+			}
+			
+			[Bindable]
+			private var goto:Number=0;
+		
+			protected function onChange(event:Event):void
+			{
+//				var step:Number=(maximum-minimum)/numElem;
+//				var module:Number = value % step;
+//				if(module==0){
+//					return;
+//				}
+//				var error:Number=module-(step/2)
+//				var pos:Number=minimum+Math.floor(value/step);
+//				if(error<0)
+//					goto=minimum+pos*step;
+//				else
+//					goto=minimum+(pos+1)*step;
+//				mover.play();
+//				mover.addEventListener(EffectEvent.EFFECT_UPDATE,updateBar);
+				callback(null);
+			}
+			
+			private var _numElem:Number=0;
+
+			public function get numElem():Number
+			{
+				return _numElem;
+			}
+
+			public function set numElem(value:Number):void
+			{
+				_numElem = value;
+			}
+			
+			private function updateBar(event:EffectEvent):void{
+				callback(event);
+			}
+			
+			public var callback=function(o){};
+			
+			protected function onMouseMove(event:MouseEvent):void
+			{
+				event.stopImmediatePropagation();	
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<s:Animate id="mover" target="{this}">
+			<s:SimpleMotionPath property="value" valueFrom="{this.value}" valueTo="{this.goto}"/>
+		</s:Animate>
+	</fx:Declarations>
+	
+	
+</s:HSlider>

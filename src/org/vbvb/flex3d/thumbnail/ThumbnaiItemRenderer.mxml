@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				autoDrawBackground="true"
+				dataChange="dataChangeEvent(event)">
+	<fx:Metadata>
+		[Event(name=D3dEvent.THUMBNAIL_CLICK_EVENT, type="org.vbvb.flex3d.thumbnail.D3dEvent")]
+	</fx:Metadata>
+	<fx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+			
+			import org.vbvb.flex3d.Container3d;
+			
+//			protected function dataChange(event:FlexEvent):void
+//			{
+//				// TODO Auto-generated method stub
+//				if(data==null) return;
+//				var th:BitmapData = (data as Container3d).t
+//			}
+			private var rLum:Number = 0.2225;
+			private var gLum:Number = 0.7169;
+			private var bLum:Number = 0.0606;
+			private var bwMatrix:Array = [rLum, gLum, bLum, 0, 0,
+				rLum, gLum, bLum, 0, 0,
+				rLum, gLum, bLum, 0, 0,
+				0, 0, 0, 1, 0];
+			
+			protected function clickImage(event:MouseEvent):void
+			{
+				var newEvent:D3dEvent=new D3dEvent(D3dEvent.THUMBNAIL_CLICK_EVENT,
+					container);
+				dispatchEvent(newEvent);
+				
+			}
+			
+			var container:Container3d=null;
+			protected function dataChangeEvent(event:FlexEvent):void
+			{
+				container=data as Container3d;	
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<mx:ColorMatrixFilter id="cmf" matrix="{bwMatrix}" />
+	</fx:Declarations>
+	<s:Group height="100%">
+		<s:layout>
+			<s:VerticalLayout/>
+		</s:layout>
+		<s:Image id="thumbImage" source="{data.thumbnail}" width="160" height="160" toolTip="{data.contained.title}"
+				 filters="{[cmf]}"
+				 mouseOver="thumbImage.filters=[]"
+				 mouseOut="thumbImage.filters=[cmf]"
+				 click="clickImage(event)"/>
+	</s:Group>
+</s:ItemRenderer>

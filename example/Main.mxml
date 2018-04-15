@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   xmlns:flex3d="org.vbvb.flex3d.*"
+			   xmlns:panel="org.vbvb.desktop3d.panel.*"
+			   xmlns:utils="org.vbvb.utils.*"
+			   xmlns:thumbnail="org.vbvb.flex3d.thumbnail.*"
+			   width="95%" minWidth="955" minHeight="880" applicationComplete="init(event)"
+			   preloader="org.vbvb.utils.preloader.CirclePreloader">
+	<fx:Metadata>
+		[Event(name="preloadComplete", type="flash.events.Event")] 
+	</fx:Metadata>
+	<fx:Style>
+		@namespace s "library://ns.adobe.com/flex/spark";
+		@namespace mx "library://ns.adobe.com/flex/mx";
+		@namespace flex3d "org.vbvb.flex3d.*";
+		@namespace panel "org.vbvb.desktop3d.panel.*";
+		@namespace utils "org.vbvb.utils.*";
+		s|Panel {
+			borderStyle: solid;
+			borderThickness: 0;
+			cornerRadius: 10;
+			borderColor: #050505;
+			backgroundColor: #eeeeff;
+			roundedBottomCorners: true;
+		}
+		s|TextArea{
+			contentBackgroundColor: #eeeeFF;
+			color: #000000;
+			skinClass: ClassReference("org.vbvb.utils.skin.skinTextArea")
+			
+		}
+		utils|Bocadillo{
+			modalTransparencyBlur: 0;
+			modal-transparency: 0.0;
+		}
+		global
+		{
+			font-size: 12;
+			font-weight: normal;
+			
+		}
+	</fx:Style>
+	<fx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			
+			import org.vbvb.desktop3d.help.Help1;
+			import org.vbvb.desktop3d.help.Help2;
+			import org.vbvb.utils.Bocadillo;
+			
+			var help1:Help1=null;
+			
+			protected function init(event:FlexEvent):void
+			{
+				help1=PopUpManager.createPopUp(this,Help1,true) as Help1;	
+			}	
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+	</fx:Declarations>
+	<s:Group>
+	<s:layout>
+		<s:VerticalLayout/>
+	</s:layout>
+	<flex3d:Panel3D id="panel3d"
+					px="{this.width/2}"
+					width="90%" 
+					height="85%"  
+					initialPosition="20" 
+					endPosition="160" 
+					pz="-400"
+					radius="900" 
+					py="30" 
+					initialAngle="-50" 
+					endAngle="40" 
+					showSlider="false">
+		<!--<panel:EditPanel/>-->
+		<panel:m001/>
+		<panel:m016/>
+		<panel:m031/>
+		<panel:m042/>
+		<panel:m057/>
+		<panel:m092/>
+		<panel:m104/>
+		<!--<s:Image x="10" y="10" width="300" height="300" source="@Embed('assets/m001.jpg')"/>
+		<s:Image x="10" y="10" width="300" height="300" source="@Embed('assets/m016.jpg')"/>
+		<s:Image x="10" y="10" width="300" height="300" source="@Embed('assets/m031.jpg')"/>
+		<s:Image x="10" y="10" width="300" height="300" source="@Embed('assets/m042.jpg')"/>
+		<s:Image x="10" y="10" width="300" height="300" source="@Embed('assets/m057.jpg')"/>
+		<s:Image x="10" y="10" width="300" height="300" source="@Embed('assets/m092.jpg')"/>
+		<s:Image x="10" y="10" width="300" height="300" source="@Embed('assets/m104.jpg')"/>-->
+	</flex3d:Panel3D>
+	<s:Group width="{parent.width}" height="12%">
+		<s:layout>
+			<s:BasicLayout/>
+		</s:layout>
+	</s:Group>
+	<thumbnail:ThumbnailList id="thumlist" width="{parent.width}" y="3" height="200" parentPanel="{panel3d}"/>
+	</s:Group>
+</s:Application>

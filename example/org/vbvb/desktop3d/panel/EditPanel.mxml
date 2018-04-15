@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Panel xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:flex3d="org.vbvb.flex3d.*"
+		 width="300" height="300" borderVisible="false" dropShadowVisible="true"
+		 title="M92 - Cúmulo globular">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:TextArea x="10" y="53" width="280" height="206"/>
+	<s:Label x="10" y="10" width="280" height="35" text="Lo que se escribe en este cuadro es capturado por las vistas en miniatura"/>
+</s:Panel>

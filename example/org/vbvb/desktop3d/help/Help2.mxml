@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<utils:Bocadillo xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				 xmlns:s="library://ns.adobe.com/flex/spark" 
+				 xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:utils="org.vbvb.utils.*" 
+				 x="200" y="100" 
+				 clickHelp="clickHandler2(event)"
+				 helpWidth="161"
+				 helpHeight="40"
+				 helpX="32"
+				 helpY="45"
+				 buttonText="Sig."
+				 buttonWidth="48"
+				 helpText="Pulse sobre un&#xd;panel para maximizar">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import mx.managers.PopUpManager;
+
+			var help3:Help3=null;
+			protected function clickHandler2(event:MouseEvent):void
+			{
+				help3=PopUpManager.createPopUp(this,Help3,true) as Help3;
+			}
+		]]>
+	</fx:Script>
+</utils:Bocadillo>
